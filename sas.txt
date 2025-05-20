@@ -1,0 +1,166 @@
+-- activity 1
+CREATE PROCEDURE add_numbers(num1 INT, num2 INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RAISE NOTICE 'Sum : %', num1 + num2;
+END; 
+$$;
+
+CALL add_numbers(7,4);
+
+-- activity 2
+CREATE PROCEDURE full_name(f_name TEXT, l_name TEXT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+full_name TEXT;
+BEGIN
+full_name := f_name || ' ' || l_name;
+RAISE NOTICE '%', full_name;
+END; 
+$$;
+
+CALL full_name('Sasmitha', 'Rajapaksha');
+
+-- activity 3
+CREATE PROCEDURE double_value(INOUT salary FLOAT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RAISE NOTICE 'Salary : Rs.%', salary;
+END; 
+$$;
+
+DO $$
+DECLARE
+salary FLOAT := 25000.00;
+BEGIN
+CALL double_value(salary);
+END 
+$$
+LANGUAGE plpgsql;
+
+-- activity 4
+CREATE DATABASE ABXCompany;
+\c ABXCompany
+CREATE TABLE products (
+product_id GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+price FLOAT,
+stock_quantity INT 
+);
+
+CREATE PROCEDURE add_product(product_name TEXT, price FLOAT, stock_quantity INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+INSERT INTO products (name, price, stock_quantity)
+VALUES (product_name, price, stock_quantity);
+END;
+$$;
+
+CALL add_product('bag', 2500.00, 10);
+
+-- activity 5
+CREATE PROCEDURE get_product_by_id(p_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+p_name VARCHAR;
+p_price FLOAT;
+p_stock INT;
+BEGIN
+SELECT name, price, stock_quantity
+INTO p_name, p_price, p_stock
+FROM products
+WHERE product_id = p_id;
+RAISE NOTICE 'Name: %, Stock: %', p_name, p_price, p_stock;
+END;
+$$;
+
+CALL get_product_by_id(1);
+
+-- activity 6
+CREATE PROCEDURE update_product_stock(p_id INT, new_stock INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+UPDATE products 
+SET stock_quantity = new_stock WHERE product_id = p_id;
+RAISE NOTICE 'Updated stock for product_id %', p_id,
+new_stock;
+END;
+$$;
+
+CALL update_product_stock(1);
+
+-- activity 7
+CREATE PROCEDURE delete_product(p_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+DELETE FROM products WHERE product_id = p_id;
+RAISE NOTICE 'Deleted product with the id: %', p_id;
+END;
+$$;
+
+CALL delete_product(1);
+
+-- activity 8
+CREATE PROCEDURE calculate_total_stock_value_of_product(p_id INT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+p_price;
+p_stock INT;
+total_value FLOAT;
+BEGIN
+SELECT price, stock_quantity INTO p_price, p_stock FROM products WHERE product_id = p_id;
+total_value := p_price * p_stock;
+RAISE NOTICE 'Total value for the product ID % is %', p_id, total_value;
+END;
+$$;
+
+CALL calculate_total_stock_value_of_product(1);
+
+-- activity 9
+CREATE PROCEDURE check_stock_category(p_id INT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+p_stock INT;
+BEGIN
+SELECT stock_quantity INTO p_stock FROM products WHERE product_id = p_id;
+CASE 
+WHEN p_stock < 10 THEN
+RAISE NOTICE 'Stock Category for the ID % : %', p_id,'Low Stock';
+WHEN p_stock BETWEEN 10 AND 50 THEN
+RAISE NOTICE 'Stock Category for the ID % : %', p_id,'Moderate Stock';
+WHEN p_stock > 50 THEN
+RAISE NOTICE 'Stock category for the ID % : %', p_id,'High Stock'; 
+END CASE;
+END; 
+$$;
+
+CALL check_stock_category(1);
+
+-- activity 10
+CREATE PROCEDURE check_stock_level(p_id INT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+p_stock INT;
+BEGIN
+SELECT stock_quantity INTO p_stock FROM products WHERE product_id = p_id;
+IF p_stock <= 10 THEN
+RAISE NOTICE 'Stock Category for the ID % : %', p_id,'Low Stock';
+ELSEIF p_stock > 10 AND p_stock <= 55 THEN
+RAISE NOTICE 'Stock Category for the ID % : %', p_id,'Sufficient Stock';
+ELSE
+RAISE NOTICE 'Stock level for the ID % : %', p_id,'High Stock'; 
+END CASE;
+END; 
+$$;
+
+CALL check_stock_level(1);
